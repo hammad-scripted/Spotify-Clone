@@ -13,6 +13,8 @@ import adminRouter from "./routes/admin.route.js"
 import statsRouter from "./routes/stats.route.js"
 import songRouter from "./routes/song.route.js"
 import albumRouter from "./routes/album.route.js"
+import errorHandler from './errors/errorHandler.js';
+import { notFound } from './errors/notFound.js';
 
 const app = express();
 
@@ -26,6 +28,8 @@ app.use("/api/v1/songs",songRouter)
 app.use("/api/v1/admin",adminRouter)
 app.use("/api/v1/albums",albumRouter)
 app.use("/api/v1/stats",statsRouter)
+app.use(notFound)
+app.use(errorHandler)
 
 
 const startServer=async()=>{
