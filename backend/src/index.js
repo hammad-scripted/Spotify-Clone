@@ -15,13 +15,15 @@ import songRouter from "./routes/song.route.js"
 import albumRouter from "./routes/album.route.js"
 import errorHandler from './errors/errorHandler.js';
 import { notFound } from './errors/notFound.js';
-
 const app = express();
 
+// * MIDDLEWARES
 app.use(morgan('tiny'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+// * ROUTES
 app.use("/api/v1/users",userRouter)
 app.use("/api/v1/auth",authRouter)
 app.use("/api/v1/songs",songRouter)
@@ -32,6 +34,7 @@ app.use(notFound)
 app.use(errorHandler)
 
 
+// * SERVER
 const startServer=async()=>{
 
   try{
