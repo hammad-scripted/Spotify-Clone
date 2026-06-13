@@ -11,7 +11,7 @@ const errorHandler=(err,req,res,next)=>{
         message:err.message|| ReasonPhrases.INTERNAL_SERVER_ERROR,
         errors:err.errors||[],
         data:err.data||null,
-        stack: process.env.NODE_ENV === 'production' ? null : err.stack
+        stack: process.env.NODE_ENV === 'development' ? null : err.stack
     })
 
 }
