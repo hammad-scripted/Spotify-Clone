@@ -1,11 +1,19 @@
-import {Button} from "@/components/ui/button";
- 
-const App = () => {
+import './App.css'
+import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/react'
+import {Button} from './components/ui/button'
+function App() {
   return (
-    <div className="text-3xl font-bold underline text-red-600">App
-    <Button variant="secondary">Click Me</Button>
-    
-    </div>
+    <>
+      <header>
+        <Show when="signed-out">
+         <Button><SignInButton /></Button> 
+          <SignUpButton />
+        </Show>
+        <Show when="signed-in">
+          <UserButton />
+        </Show>
+      </header>
+    </>
   )
 }
 
