@@ -24,4 +24,13 @@ export const checkRole = async (req, res, next) => {
       'You are not an admin!',
     );
   }
+
+  // ? check if user is admin
+
+  const user = await getUser({ userId: req.auth.userId });
+
+  if (!user) {
+    throw new ApiError(StatusCodes.UNAUTHORIZED, 'You are not logged in!');
+  }
+  next();
 };
