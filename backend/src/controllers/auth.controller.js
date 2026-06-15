@@ -1,3 +1,6 @@
+
+import ApiError from "../utils/apiError.js";
+import ApiResponse from "../utils/apiResponse.js";
 export const authCallback = async (req, res) => {
   const { id, firstName, lastName, imageUrl } = req.body;
 
@@ -9,7 +12,7 @@ export const authCallback = async (req, res) => {
   if (user) {
     return res
       .status(StatusCodes.OK)
-      .json(new ApiResponse(StatusCodes.OK, 'User already exists'));
+      .json(new ApiResponse(StatusCodes.OK,user, 'User already exists'));
   }
   const newUser = new User({
     clerkId: id,
@@ -19,5 +22,5 @@ export const authCallback = async (req, res) => {
   await newUser.save();
   return res
     .status(StatusCodes.CREATED)
-    .json(new ApiResponse(StatusCodes.CREATED, 'User created successfully'));
+    .json(new ApiResponse(StatusCodes.CREATED,newUser, 'User created successfully'));
 };
