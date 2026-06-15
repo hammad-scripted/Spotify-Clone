@@ -30,6 +30,9 @@ app.use(
   fileupload({
     useTempFiles: true,
     tempFileDir: path.join(__dirname, 'temp'),
+    limits:{
+      files:10*1024*1024
+    }
   }),
 );
 

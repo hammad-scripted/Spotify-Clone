@@ -1,10 +1,15 @@
-import { clerkClient, getUser } from '@clerk/express';
+import { clerkClient } from '@clerk/express';
 import { StatusCodes } from 'http-status-codes';
 import ApiError from '../utils/apiError.js';
+
 export const protectRoute = async (req, res, next) => {
   if (!req.auth.userId) {
-    throw new ApiError(StatusCodes.UNAUTHORIZED, 'You are not logged in!');
+    throw new ApiError(
+      StatusCodes.UNAUTHORIZED,
+      'You are not logged in!'
+    );
   }
+
   next();
 };
 
@@ -12,28 +17,25 @@ export const checkRole = async (req, res, next) => {
   try {
     const currentUser = await clerkClient.users.getUser(req.auth.userId);
     console.log(currentUser);
+
     const isAdmin =
-      process.env.ADMIN_EMAIL === currentUser.primaryEmailAddress?.emailAddress;
+      currentUser.primaryEmailAddress?.emailAddress ===
+      process.env.ADMIN_EMAIL;
+
     if (!isAdmin) {
       throw new ApiError(
-        StatusCodes.UNAUTHORIZED,
-        'You are not an admin!, you are not authorized to access this route',
+        StatusCodes.FORBIDDEN,
+        'You are not authorized to access this route'
       );
     }
+
     next();
-  } catch (e) {
+  } catch (error) {
+    console.error(error);
+
     throw new ApiError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      'You are not an admin!, you are not authorized to access this route',
+      'Something went wrong while verifying admin access'
     );
   }
-
-  // ? check if user is admin
-
-  const user = await getUser({ userId: req.auth.userId });
-
-  if (!user) {
-    throw new ApiError(StatusCodes.UNAUTHORIZED, 'You are not logged in!');
-  }
-  next();
 };
