@@ -22,7 +22,7 @@ const app = express();
 app.use(morgan('tiny'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(clerkMiddleware({ secretKey: process.env.CLERK_SECRET_KEY })); //! this is a middleware for authentication in clerk
+app.use(clerkMiddleware({ secretKey: process.env.CLERK_SECRET_KEY })); //! this is a middleware for authentication in clerk,this will add auth to req object
 
 // * ROUTES
 app.use('/api/v1/users', userRouter);

@@ -13,15 +13,18 @@ export const checkRole = async (req, res, next) => {
     const currentUser = await clerkClient.users.getUser(req.auth.userId);
     console.log(currentUser);
     const isAdmin =
-      process.env.ADMIN_EMAIL === currentUser.emailAddresses[0].emailAddress;
+      process.env.ADMIN_EMAIL === currentUser.primaryEmailAddress?.emailAddress;
     if (!isAdmin) {
-      throw new ApiError(StatusCodes.UNAUTHORIZED, 'You are not an admin!');
+      throw new ApiError(
+        StatusCodes.UNAUTHORIZED,
+        'You are not an admin!, you are not authorized to access this route',
+      );
     }
     next();
   } catch (e) {
     throw new ApiError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      'You are not an admin!',
+      'You are not an admin!, you are not authorized to access this route',
     );
   }
 
