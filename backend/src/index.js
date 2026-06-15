@@ -2,6 +2,8 @@ import express from 'express';
 import chalk from 'chalk';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
+import path from 'node:path';
+import fileupload from 'express-fileupload';
 import { clerkMiddleware } from '@clerk/express';
 import dns from 'node:dns/promises';
 dns.setServers(['8.8.8.8', '1.1.1.1']);
@@ -17,12 +19,19 @@ import albumRouter from './routes/album.route.js';
 import errorHandler from './errors/errorHandler.js';
 import { notFound } from './errors/notFound.js';
 const app = express();
+const __dirname = path.resolve();
 
 // * MIDDLEWARES
 app.use(morgan('tiny'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(clerkMiddleware({ secretKey: process.env.CLERK_SECRET_KEY })); //! this is a middleware for authentication in clerk,this will add auth to req object
+app.use(
+  fileupload({
+    useTempFiles: true,
+    tempFileDir: path.join(__dirname, 'temp'),
+  }),
+);
 
 // * ROUTES
 app.use('/api/v1/users', userRouter);
