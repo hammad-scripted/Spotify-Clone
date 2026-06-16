@@ -19,6 +19,7 @@ const albumSchema = new Schema(
       type: Number,
       required: [true, 'Release year is required'],
     },
+    // ? array of song with id, foreign key to song 
     songs:[{
         type:Schema.Types.ObjectId,
         ref:'Song',
@@ -27,3 +28,5 @@ const albumSchema = new Schema(
   },
   { timestamps: true },
 );
+
+export const Album = model('Album', albumSchema);

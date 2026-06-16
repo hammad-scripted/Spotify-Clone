@@ -3,7 +3,7 @@ import ApiError from '../utils/apiError.js';
 import {StatusCodes} from 'http-status-codes';
 import {Song} from '../models/song.model.js';
 import {Album} from '../models/album.model.js'; 
-import {cloudinary} from '../utils/cloudinary.js';
+import cloudinary from '../utils/cloudinary.js';
 const uploadToCloudinary=async(file)=>{
     try{
     const {secure_url}=await cloudinary.uploader.upload(file.tempFilePath,{resource_type:'auto'});
@@ -13,7 +13,7 @@ const uploadToCloudinary=async(file)=>{
     }   
 }
 
-export const createSong=(req,res)=>{
+export const createSong=async (req,res)=>{
    
     if(!req.files || !req.files.audioFile || !req.files.imageFile){
         throw new ApiError(StatusCodes.BAD_REQUEST,'Missing audio or image file');
@@ -24,8 +24,8 @@ export const createSong=(req,res)=>{
     const imageFile=req.files.imageFile;
 
 
-    const audioUrl= await uploadToCloudinary(audioFile);
-    const audioUrl= await uploadToCloudinary(imageFile);
+    const audioUrl=  uploadToCloudinary(audioFile);
+    const imageUrl= uploadToCloudinary(imageFile);
 
     const song=new Song({
         title,
@@ -111,4 +111,11 @@ export const deleteAlbum=async(req,res)=>{
     .status(StatusCodes.OK)
     .json(new ApiResponse(StatusCodes.OK,album,'Album deleted successfully'));      
 
+}
+
+export const checkAdmin=async(req,res)=>{
+
+    return res
+    .status(StatusCodes.OK)
+    .json(new ApiResponse(StatusCodes.OK,'You are an admin','You are an admin'));   
 }
