@@ -1,7 +1,5 @@
 import ApiResponse from '../utils/apiResponse.js';
-
 import ApiError from '../utils/apiError.js';
-
 import {StatusCodes} from 'http-status-codes';
 import {Song} from '../models/song.model.js';
 import {Album} from '../models/album.model.js'; 
@@ -62,7 +60,7 @@ export const deleteSong=async(req,res)=>{
     const {songId}=req.params;
 
     const song= await Song.findById(songId);
-    // ? if song belongs to album then we need to remove it from album
+    //? if song belongs to album then we need to remove it from album
 
     if(song.albumId){
 
@@ -77,5 +75,40 @@ export const deleteSong=async(req,res)=>{
     .status(StatusCodes.OK)
     .json(new ApiResponse(StatusCodes.OK,song,'Song deleted successfully'));
 
+
+}
+
+export const createAlbum=async(req,res)=>{
+
+    const{title,artist,releaseYear}=req.body;
+    const {imageFile}=req.files;
+
+    const imageUrl=await uploadToCloudinary(imageFile);
+
+    const album=new Album({
+        title,
+        artist,
+        releaseYear,
+        imageUrl
+    })
+    await album.save();
+    return res
+    .status(StatusCodes.CREATED)
+    .json(new ApiResponse(StatusCodes.CREATED,album,'Album created successfully')); 
+
+}
+
+export const deleteAlbum=async(req,res)=>{
+
+    const {id}=req.params;
+
+    const album=await Album.findById(id);
+    if(!album){
+        throw new ApiError(StatusCodes.NOT_FOUND,'Album not found');
+    }
+    await album.remove();
+    return res
+    .status(StatusCodes.OK)
+    .json(new ApiResponse(StatusCodes.OK,album,'Album deleted successfully'));      
 
 }
