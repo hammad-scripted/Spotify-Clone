@@ -11,4 +11,5 @@ const router = Router();
 router.get('/', protectRoute, getAllUsers);
 // Todo get messages
 
+
 export default router;

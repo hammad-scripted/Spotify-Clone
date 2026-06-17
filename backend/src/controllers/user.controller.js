@@ -4,7 +4,10 @@ import ApiError from '../utils/apiError.js';
 import { StatusCodes } from 'http-status-codes';
 
 export const getAllUsers = async (req, res) => {
-  const users = await User.find({});
+  const currentUserId = req.auth.userId;
+  const users = await User.find({
+    clerkId: { $ne: currentUserId },
+  });
 
   return res
     .status(StatusCodes.OK)
