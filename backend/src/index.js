@@ -17,6 +17,7 @@ import statsRouter from './routes/stats.route.js';
 import songRouter from './routes/song.route.js';
 import albumRouter from './routes/album.route.js';
 import errorHandler from './errors/errorHandler.js';
+import helloRouter from './routes/hello.route.js';
 import { notFound } from './errors/notFound.js';
 const app = express();
 const __dirname = path.resolve();
@@ -30,9 +31,9 @@ app.use(
   fileupload({
     useTempFiles: true,
     tempFileDir: path.join(__dirname, 'temp'),
-    limits:{
-      files:10*1024*1024
-    }
+    limits: {
+      files: 10 * 1024 * 1024,
+    },
   }),
 );
 
@@ -43,6 +44,7 @@ app.use('/api/v1/songs', songRouter);
 app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/albums', albumRouter);
 app.use('/api/v1/stats', statsRouter);
+app.use('/api/v1/hello', helloRouter);
 app.use(notFound);
 app.use(errorHandler);
 
