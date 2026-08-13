@@ -19,6 +19,21 @@ export const getConversation = async (req, res) => {
   );
 };
 
+export const getRecentConversations = async (req, res) => {
+  const userId = req.userId;
+  const messages = await Message.find({
+    $or: [{ senderId: userId }, { receiverId: userId }],
+  }).sort({ createdAt: -1 }).limit(100);
+  const latestByUser = new Map();
+  for (const message of messages) {
+    const otherUserId = message.senderId === userId ? message.receiverId : message.senderId;
+    if (!latestByUser.has(otherUserId)) latestByUser.set(otherUserId, message);
+  }
+  return res.status(StatusCodes.OK).json(
+    new ApiResponse(StatusCodes.OK, [...latestByUser.values()], 'Recent conversations fetched successfully'),
+  );
+};
+
 export const sendMessage = async (req, res) => {
   const senderId = req.userId;
   const { receiverId, content } = req.body;

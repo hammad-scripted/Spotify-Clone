@@ -9,20 +9,12 @@ export const authCallback = async (req, res) => {
   if (!id || !firstName || !lastName || !imageUrl) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Missing required fields");
   }
-  // ? check if user exists already
-  const user = await User.findOne({ clerkId: id });
-  if (user) {
-    return res
-      .status(StatusCodes.OK)
-      .json(new ApiResponse(StatusCodes.OK,user, 'User already exists'));
-  }
-  const newUser = new User({
-    clerkId: id,
-    fullName: `${firstName} ${lastName}`,
-    imageUrl: imageUrl,
-  });
-  await newUser.save();
+  const user = await User.findOneAndUpdate(
+    { clerkId: id },
+    { fullName: `${firstName} ${lastName}`.trim(), imageUrl },
+    { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true },
+  );
   return res
-    .status(StatusCodes.CREATED)
-    .json(new ApiResponse(StatusCodes.CREATED,newUser, 'User created successfully'));
+    .status(StatusCodes.OK)
+    .json(new ApiResponse(StatusCodes.OK, user, 'User synced successfully'));
 };
