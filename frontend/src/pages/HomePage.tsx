@@ -8,6 +8,7 @@ import {
 import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
+import axios from 'axios';
 import { axiosInstance } from '../lib/axios';
 import { cn } from '../lib/utils';
 
@@ -100,21 +101,21 @@ export const HomePage = () => {
   const messageEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    Promise.all([
+    Promise.allSettled([
       axiosInstance.get('/songs'),
       axiosInstance.get('/songs/featured'),
       axiosInstance.get('/songs/made-for-you'),
       axiosInstance.get('/songs/trending-songs'),
       axiosInstance.get('/albums'),
     ]).then(([all, featured, made, trending, albumResponse]) => {
-      const catalog = all.data.data || [];
-      if (catalog.length) setSongs(catalog);
-      setMadeForYou(made.data.data || []);
-      setTrendingSongs(trending.data.data || []);
-      setAlbums(albumResponse.data.data || []);
-      const firstSong = featured.data.data?.[0] || catalog[0];
+      const catalog = all.status === 'fulfilled' ? all.value.data.data || [] : [];
+      if (catalog.length) setSongs(catalog); else setNotice('The server is offline, so this is a visual demo mix.');
+      if (made.status === 'fulfilled') setMadeForYou(made.value.data.data || []);
+      if (trending.status === 'fulfilled') setTrendingSongs(trending.value.data.data || []);
+      if (albumResponse.status === 'fulfilled') setAlbums(albumResponse.value.data.data || []);
+      const firstSong = featured.status === 'fulfilled' ? featured.value.data.data?.[0] || catalog[0] : catalog[0];
       if (firstSong) setCurrent(firstSong);
-    }).catch(() => setNotice('The server is offline, so this is a visual demo mix.'));
+    });
   }, []);
 
   useEffect(() => {
@@ -127,7 +128,9 @@ export const HomePage = () => {
     getToken().then((token) => {
       if (!token) return;
       axiosInstance.get('/users').then(({ data }) => { setPeople(data.data || []); setActivePerson((person) => person || data.data?.[0] || null); }).catch(() => undefined);
-      const socket = io(apiUrl.replace('/api/v1', ''), { auth: { token } });
+      const socket = io(apiUrl.replace('/api/v1', ''), {
+        auth: (callback) => getToken().then((freshToken) => callback({ token: freshToken })),
+      });
       socket.on('message:new', (message: Message) => {
         if ([message.senderId, message.receiverId].includes(userId)) setMessages((items) => items.some((item) => item._id === message._id) ? items : [...items, message]);
       });
@@ -138,7 +141,11 @@ export const HomePage = () => {
 
   useEffect(() => {
     if (!activePerson) return;
-    axiosInstance.get(`/messages/${activePerson.clerkId}`).then(({ data }) => setMessages(data.data || [])).catch(() => setMessages([]));
+    const controller = new AbortController();
+    axiosInstance.get(`/messages/${activePerson.clerkId}`, { signal: controller.signal })
+      .then(({ data }) => setMessages(data.data || []))
+      .catch((error) => { if (!axios.isCancel(error)) setMessages([]); });
+    return () => controller.abort();
   }, [activePerson]);
 
   useEffect(() => messageEndRef.current?.scrollIntoView({ behavior: 'smooth' }), [messages]);

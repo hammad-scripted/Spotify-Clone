@@ -9,6 +9,9 @@ export const authCallback = async (req, res) => {
   if (!id || !firstName || !lastName || !imageUrl) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Missing required fields");
   }
+  if (id !== req.userId) {
+    throw new ApiError(StatusCodes.FORBIDDEN, 'You cannot sync another user profile');
+  }
   const user = await User.findOneAndUpdate(
     { clerkId: id },
     { fullName: `${firstName} ${lastName}`.trim(), imageUrl },

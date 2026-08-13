@@ -1,13 +1,16 @@
 @import "tailwindcss";
 @import "@fontsource-variable/geist";
+@import "@fontsource-variable/space-grotesk";
 
 @theme {
   --font-sans: "Geist Variable", sans-serif;
+  --font-display: "Space Grotesk Variable", sans-serif;
 }
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; background: #07070a; }
 body { margin: 0; min-width: 320px; min-height: 100vh; background: #07070a; font-family: "Geist Variable", sans-serif; }
+h1, h2, h3 { font-family: "Space Grotesk Variable", "Geist Variable", sans-serif; font-optical-sizing: auto; }
 button, a, input { -webkit-tap-highlight-color: transparent; }
 button { cursor: pointer; }
 button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid #bef264; outline-offset: 3px; }

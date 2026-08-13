@@ -1,37 +1,21 @@
 import { useAuth } from '@clerk/react';
-import { useEffect, useState } from 'react';
-import { axiosInstance } from '../lib/axios';
 import { Loader } from 'lucide-react';
-const updateApiToken = async (token: string | null) => {
-  if (token) {
-    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    return;
-  }
-  delete axiosInstance.defaults.headers.common['Authorization'];
-};
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const { getToken, userId } = useAuth();
-  const [loading, setLoading] = useState(true);
+import { useLayoutEffect } from 'react';
+import { axiosInstance } from '../lib/axios';
 
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const token = await getToken();
-        updateApiToken(token);
-      } catch (error: unknown) {
-        updateApiToken(null);
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    initAuth();
-  }, [getToken, userId]);
-  if (loading)
-    return (
-      <div className="h-screen w-full flex items-center justify-center">
-        <Loader className="size-8 text-emerald-500 animate-spin" />
-      </div>
-    );
-  return <div>{children}</div>;
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const { getToken, isLoaded } = useAuth();
+  useLayoutEffect(() => {
+    if (!isLoaded) return;
+    const interceptor = axiosInstance.interceptors.request.use(async (config) => {
+      const token = await getToken();
+      if (token) config.headers.Authorization = `Bearer ${token}`;
+      else delete config.headers.Authorization;
+      return config;
+    });
+    return () => axiosInstance.interceptors.request.eject(interceptor);
+  }, [getToken, isLoaded]);
+
+  if (!isLoaded) return <div className="grid min-h-screen place-items-center bg-[#07070a]"><Loader className="size-7 animate-spin text-lime-300" /></div>;
+  return <>{children}</>;
 };

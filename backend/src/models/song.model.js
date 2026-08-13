@@ -13,10 +13,12 @@ const songSchema = new Schema({
     type: String,
     required: [true, 'Audio url is required'],
   },
+  audioPublicId: { type: String },
   imageUrl: {
     type: String,
     required: [true, 'Image url is required'],
   },
+  imagePublicId: { type: String },
   duration: {
     type: Number,
   },

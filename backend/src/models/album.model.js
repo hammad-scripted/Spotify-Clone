@@ -14,6 +14,7 @@ const albumSchema = new Schema(
       type: String,
       required: [true, 'Image url is required'],
     },
+    imagePublicId: { type: String },
 
     releaseYear: {
       type: Number,
