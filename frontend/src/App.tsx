@@ -3,7 +3,6 @@ import { Route } from 'react-router-dom';
 import { Routes } from 'react-router-dom';
 import { AuthCallBackPage } from './pages/AuthCallBackPage';
 import { HomePage } from './pages/HomePage';
-import {axiosInstance} from './lib/axios'
 function App() {
   
 

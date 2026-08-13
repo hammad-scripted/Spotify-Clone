@@ -5,6 +5,7 @@ import { Loader } from 'lucide-react';
 const updateApiToken = async (token: string | null) => {
   if (token) {
     axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    return;
   }
   delete axiosInstance.defaults.headers.common['Authorization'];
 };
@@ -17,7 +18,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const token = await getToken();
         updateApiToken(token);
-      } catch (error: any) {
+      } catch (error: unknown) {
         updateApiToken(null);
         console.error(error);
       } finally {
@@ -25,7 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
     initAuth();
-  }, [getToken]);
+  }, [getToken, userId]);
   if (loading)
     return (
       <div className="h-screen w-full flex items-center justify-center">
