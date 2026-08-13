@@ -32,6 +32,7 @@ const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: allowedOrigins, credentials: true } });
 
 app.set('io', io);
+app.disable('x-powered-by');
 app.use(morgan('tiny'));
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
@@ -43,6 +44,10 @@ app.use(fileupload({
   limits: { fileSize: 10 * 1024 * 1024 },
   abortOnLimit: true,
 }));
+
+app.get('/api/v1/health', (_req, res) => {
+  res.status(200).json({ status: 'ok', uptime: process.uptime() });
+});
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/auth', authRouter);
@@ -82,5 +87,14 @@ const startServer = async () => {
 };
 
 startServer();
+
+const shutDown = (signal) => {
+  console.log(`${signal} received. Closing server...`);
+  io.close();
+  server.close(() => process.exit(0));
+};
+
+process.on('SIGTERM', () => shutDown('SIGTERM'));
+process.on('SIGINT', () => shutDown('SIGINT'));
 
 export { app, server };
