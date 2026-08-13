@@ -24,8 +24,10 @@ export const createSong=async (req,res)=>{
     const imageFile=req.files.imageFile;
 
 
-    const audioUrl=  uploadToCloudinary(audioFile);
-    const imageUrl= uploadToCloudinary(imageFile);
+    const [audioUrl, imageUrl] = await Promise.all([
+        uploadToCloudinary(audioFile),
+        uploadToCloudinary(imageFile),
+    ]);
 
     const song=new Song({
         title,
@@ -60,17 +62,16 @@ export const deleteSong=async(req,res)=>{
     const {songId}=req.params;
 
     const song= await Song.findById(songId);
+    if(!song){
+        throw new ApiError(StatusCodes.NOT_FOUND,'Song not found');
+    }
     //? if song belongs to album then we need to remove it from album
 
     if(song.albumId){
 
         await Album.findByIdAndUpdate(song.albumId,{$pull:{songs:song._id}} )
     }
-    if(!song){
-        throw new ApiError(StatusCodes.NOT_FOUND,'Song not found');
-    }   
-
-    await song.remove();
+    await song.deleteOne();
     return res
     .status(StatusCodes.OK)
     .json(new ApiResponse(StatusCodes.OK,song,'Song deleted successfully'));
@@ -81,6 +82,9 @@ export const deleteSong=async(req,res)=>{
 export const createAlbum=async(req,res)=>{
 
     const{title,artist,releaseYear}=req.body;
+    if (!req.files?.imageFile) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, 'Missing album image');
+    }
     const {imageFile}=req.files;
 
     const imageUrl=await uploadToCloudinary(imageFile);
@@ -100,13 +104,14 @@ export const createAlbum=async(req,res)=>{
 
 export const deleteAlbum=async(req,res)=>{
 
-    const {id}=req.params;
+    const {albumId}=req.params;
 
-    const album=await Album.findById(id);
+    const album=await Album.findById(albumId);
     if(!album){
         throw new ApiError(StatusCodes.NOT_FOUND,'Album not found');
     }
-    await album.remove();
+    await Song.updateMany({ albumId }, { $set: { albumId: null } });
+    await album.deleteOne();
     return res
     .status(StatusCodes.OK)
     .json(new ApiResponse(StatusCodes.OK,album,'Album deleted successfully'));      

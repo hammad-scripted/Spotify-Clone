@@ -5,7 +5,7 @@ import { StatusCodes } from 'http-status-codes';
 import { Album } from '../models/album.model.js';
 
 export const getAllAlbums = async (req, res) => {
-  const albums = await Album.fine({}).sort({ createdAt: -1 });
+  const albums = await Album.find({}).sort({ createdAt: -1 });
 
   return res
     .status(StatusCodes.OK)
@@ -15,7 +15,7 @@ export const getAllAlbums = async (req, res) => {
 };
 
 export const getAlbumById = async (req, res) => {
-  const { id: albumId } = req.params;
+  const { albumId } = req.params;
 
   const album = await Album.findById(albumId).populate('songs');
 

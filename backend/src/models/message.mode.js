@@ -1,22 +1,19 @@
-import {Schema,model}from 'mongoose';
+import { Schema, model } from 'mongoose';
 
+const messageSchema = new Schema(
+  {
+    senderId: { type: String, required: true, index: true },
+    receiverId: { type: String, required: true, index: true },
+    content: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: [1000, 'Message cannot exceed 1000 characters'],
+    },
+  },
+  { timestamps: true },
+);
 
-const messageSchema=new Schema=({
+messageSchema.index({ senderId: 1, receiverId: 1, createdAt: 1 });
 
-    senderId:{
-        type:String,
-        required:true
-    }, //? clerk userid
-    receiverId:{
-        type:String,
-        required:true
-    },//? clerk userid
-    content:{
-        type:String,
-        required:true   
-    }
-},{
-    timestamps:true
-})
-
-export const Message=model("Message",messageSchema);    
+export const Message = model('Message', messageSchema);

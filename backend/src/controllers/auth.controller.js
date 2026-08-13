@@ -1,6 +1,8 @@
 
-import ApiError from "../utils/apiError.js";
-import ApiResponse from "../utils/apiResponse.js";
+import { StatusCodes } from 'http-status-codes';
+import { User } from '../models/user.model.js';
+import ApiError from '../utils/apiError.js';
+import ApiResponse from '../utils/apiResponse.js';
 export const authCallback = async (req, res) => {
   const { id, firstName, lastName, imageUrl } = req.body;
 
@@ -8,7 +10,7 @@ export const authCallback = async (req, res) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Missing required fields");
   }
   // ? check if user exists already
-  const user = User.findOne({ clerkId: id });
+  const user = await User.findOne({ clerkId: id });
   if (user) {
     return res
       .status(StatusCodes.OK)
