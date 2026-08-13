@@ -16,8 +16,8 @@ export const checkRole = async (req, res, next) => {
     const currentUser = await clerkClient.users.getUser(req.userId);
 
     const isAdmin =
-      currentUser.primaryEmailAddress?.emailAddress ===
-      process.env.ADMIN_EMAIL;
+      currentUser.primaryEmailAddress?.emailAddress?.toLowerCase() ===
+      process.env.ADMIN_EMAIL?.trim().toLowerCase();
 
     if (!isAdmin) {
       return next(new ApiError(

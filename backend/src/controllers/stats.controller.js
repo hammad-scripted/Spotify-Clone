@@ -1,31 +1,21 @@
 
 
-import { Router } from 'express';
 import ApiResponse from './../utils/apiResponse.js';
-import ApiError from './../utils/apiError.js';
 import { StatusCodes } from 'http-status-codes';
 import { Song } from '../models/song.model.js';
 import { Album } from '../models/album.model.js';
 import { User } from '../models/user.model.js';
 
 export const getStats = async (req, res) => {
-  const { totalSongs, totalAlbums, totalUsers, uniqueArtists } =
+  const [totalSongs, totalAlbums, totalUsers, songArtists, albumArtists] =
     await Promise.all([
       Song.countDocuments(),
       Album.countDocuments(),
       User.countDocuments(),
-
-      Song.aggregate([
-        {
-          $unionWith: {
-            coll: 'albums',
-            pipeline: [],
-          },
-        },
-        { $group: { _id: '$artist' } },
-        { $count: 'count' },
-      ]),
+      Song.distinct('artist'),
+      Album.distinct('artist'),
     ]);
+  const totalArtists = new Set([...songArtists, ...albumArtists]).size;
 
   return res.status(StatusCodes.OK).json(
     new ApiResponse(
@@ -34,9 +24,9 @@ export const getStats = async (req, res) => {
         totalSongs,
         totalAlbums,
         totalUsers,
-        totalArtists: uniqueArtists[0]?.count || 0,
+        totalArtists,
       },
       'Stats fetched successfully',
     ),
   );
-}
+};

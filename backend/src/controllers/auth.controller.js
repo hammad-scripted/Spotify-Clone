@@ -12,7 +12,7 @@ export const authCallback = async (req, res) => {
   const user = await User.findOneAndUpdate(
     { clerkId: id },
     { fullName: `${firstName} ${lastName}`.trim(), imageUrl },
-    { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true },
+    { returnDocument: 'after', upsert: true, runValidators: true, setDefaultsOnInsert: true },
   );
   return res
     .status(StatusCodes.OK)

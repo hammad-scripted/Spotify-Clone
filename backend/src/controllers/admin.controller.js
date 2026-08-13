@@ -4,6 +4,13 @@ import {StatusCodes} from 'http-status-codes';
 import {Song} from '../models/song.model.js';
 import {Album} from '../models/album.model.js'; 
 import cloudinary from '../utils/cloudinary.js';
+import { unlink } from 'node:fs/promises';
+
+const cleanupFile = async (file) => {
+    if (!file?.tempFilePath) return;
+    await unlink(file.tempFilePath).catch(() => undefined);
+};
+
 const uploadToCloudinary=async(file)=>{
     try{
     const {secure_url}=await cloudinary.uploader.upload(file.tempFilePath,{resource_type:'auto'});
@@ -20,6 +27,12 @@ export const createSong=async (req,res)=>{
     }   
 
     const {title,artist,albumId,duration}=req.body;
+    if (!title?.trim() || !artist?.trim()) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, 'Title and artist are required');
+    }
+    if (albumId && !(await Album.exists({ _id: albumId }))) {
+        throw new ApiError(StatusCodes.NOT_FOUND, 'Album not found');
+    }
     const audioFile=req.files.audioFile;
     const imageFile=req.files.imageFile;
 
@@ -27,11 +40,11 @@ export const createSong=async (req,res)=>{
     const [audioUrl, imageUrl] = await Promise.all([
         uploadToCloudinary(audioFile),
         uploadToCloudinary(imageFile),
-    ]);
+    ]).finally(() => Promise.all([cleanupFile(audioFile), cleanupFile(imageFile)]));
 
     const song=new Song({
-        title,
-        artist,
+        title:title.trim(),
+        artist:artist.trim(),
         audioUrl,
         imageUrl,
         duration,
@@ -82,16 +95,20 @@ export const deleteSong=async(req,res)=>{
 export const createAlbum=async(req,res)=>{
 
     const{title,artist,releaseYear}=req.body;
+    if (!title?.trim() || !artist?.trim() || !releaseYear) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, 'Title, artist, and release year are required');
+    }
     if (!req.files?.imageFile) {
         throw new ApiError(StatusCodes.BAD_REQUEST, 'Missing album image');
     }
     const {imageFile}=req.files;
 
-    const imageUrl=await uploadToCloudinary(imageFile);
+    const imageUrl=await uploadToCloudinary(imageFile)
+      .finally(() => cleanupFile(imageFile));
 
     const album=new Album({
-        title,
-        artist,
+        title:title.trim(),
+        artist:artist.trim(),
         releaseYear,
         imageUrl
     })

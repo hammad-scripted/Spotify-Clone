@@ -3,8 +3,9 @@ import {
   ArrowRight, ChevronLeft, ChevronRight, Clock3, Disc3, Heart, Home, Library,
   ListMusic, Maximize2, MessageCircle, MoreHorizontal, Pause, Play, Radio,
   Repeat2, Search, Send, Shuffle, SkipBack, SkipForward, Sparkles, Users,
-  Volume2, X, Zap,
+  Volume2, X, Zap, ShieldCheck,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { axiosInstance } from '../lib/axios';
@@ -13,6 +14,7 @@ import { cn } from '../lib/utils';
 type Song = { _id: string; title: string; artist: string; imageUrl?: string; audioUrl?: string; duration?: number; isPreview?: boolean; sourceUrl?: string };
 type ChatUser = { _id: string; clerkId: string; fullName: string; imageUrl: string };
 type Message = { _id: string; senderId: string; receiverId: string; content: string; createdAt: string };
+type Album = { _id: string; title: string; artist: string; imageUrl: string; releaseYear: number; songs?: string[] };
 
 const demoSongs: Song[] = [
   { _id: 'demo-1', title: 'Afterglow', artist: 'Luna Park', duration: 214 },
@@ -72,6 +74,9 @@ export const HomePage = () => {
   const { getToken, userId } = useAuth();
   const { user } = useUser();
   const [songs, setSongs] = useState<Song[]>(demoSongs);
+  const [madeForYou, setMadeForYou] = useState<Song[]>([]);
+  const [trendingSongs, setTrendingSongs] = useState<Song[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
   const [query, setQuery] = useState('');
   const [current, setCurrent] = useState<Song>(demoSongs[0]);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -95,8 +100,20 @@ export const HomePage = () => {
   const messageEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    axiosInstance.get('/songs').then(({ data }) => {
-      if (data.data?.length) { setSongs(data.data); setCurrent(data.data[0]); }
+    Promise.all([
+      axiosInstance.get('/songs'),
+      axiosInstance.get('/songs/featured'),
+      axiosInstance.get('/songs/made-for-you'),
+      axiosInstance.get('/songs/trending-songs'),
+      axiosInstance.get('/albums'),
+    ]).then(([all, featured, made, trending, albumResponse]) => {
+      const catalog = all.data.data || [];
+      if (catalog.length) setSongs(catalog);
+      setMadeForYou(made.data.data || []);
+      setTrendingSongs(trending.data.data || []);
+      setAlbums(albumResponse.data.data || []);
+      const firstSong = featured.data.data?.[0] || catalog[0];
+      if (firstSong) setCurrent(firstSong);
     }).catch(() => setNotice('The server is offline, so this is a visual demo mix.'));
   }, []);
 
@@ -139,6 +156,11 @@ export const HomePage = () => {
   const filteredSongs = useMemo(() => songs.filter((song) => `${song.title} ${song.artist}`.toLowerCase().includes(query.trim().toLowerCase())), [songs, query]);
   const rapSongs = useMemo(() => songs.filter((song) => /kr\$na|raftaar|ikka|honey singh/i.test(song.artist)), [songs]);
   const likedSongs = useMemo(() => songs.filter((song) => likedIds.has(song._id)), [songs, likedIds]);
+  const discoverySongs = useMemo(() => {
+    if (query) return filteredSongs;
+    const unique = new Map([...madeForYou, ...songs].map((song) => [song._id, song]));
+    return [...unique.values()];
+  }, [filteredSongs, madeForYou, query, songs]);
 
   const toggleLike = (id: string) => setLikedIds((ids) => {
     const next = new Set(ids); if (next.has(id)) next.delete(id); else next.add(id);
@@ -181,6 +203,7 @@ export const HomePage = () => {
       </nav>
       <div className="my-6 h-px bg-white/[.06]" />
       <button onClick={() => { setShowLiked(true); requestAnimationFrame(() => document.getElementById('liked')?.scrollIntoView()); }} className={cn('flex items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition hover:bg-white/[.05]', showLiked ? 'text-lime-300' : 'text-zinc-500')}><span className="grid size-7 place-items-center rounded-lg bg-gradient-to-br from-violet-600 to-lime-300 text-white"><Heart className="size-3.5" fill="currentColor" /></span>Liked songs<span className="ml-auto text-[10px] text-zinc-600">{likedIds.size}</span></button>
+      <Link to="/admin" className="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-zinc-500 transition hover:bg-white/[.05] hover:text-white"><span className="grid size-7 place-items-center rounded-lg border border-white/10 bg-white/[.04]"><ShieldCheck className="size-3.5" /></span>Admin studio</Link>
       <div className="mt-auto rounded-2xl border border-white/[.07] bg-white/[.025] p-4">
         <div className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.16em] text-lime-300"><Zap className="size-3" />Live catalog</div>
         <p className="text-2xl font-semibold tracking-[-.05em]">{songs.length}<span className="ml-1 text-xs font-normal text-zinc-600">tracks</span></p>
@@ -226,9 +249,19 @@ export const HomePage = () => {
       </section>}
 
       <section id="discover" className="mt-20 scroll-mt-24">
-        <SectionTitle eyebrow="Made for you" title={query ? `Results for “${query}”` : 'Fresh frequencies'} action={filteredSongs.length > 6 ? <button onClick={() => setShowAllSongs((value) => !value)} className="flex items-center gap-1.5 text-xs text-zinc-500 transition hover:text-white">{showAllSongs ? 'Show less' : 'Explore all'} <ArrowRight className="size-3.5" /></button> : undefined} />
-        {filteredSongs.length ? <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">{filteredSongs.slice(0, showAllSongs || query ? filteredSongs.length : 6).map(songCard)}</div> : <EmptyState icon={Search} title="No signal found" copy="Try KR$NA, Raftaar, Ikka or Honey Singh." action={() => setQuery('')} />}
+        <SectionTitle eyebrow="Made for you" title={query ? `Results for “${query}”` : 'Fresh frequencies'} action={discoverySongs.length > 6 ? <button onClick={() => setShowAllSongs((value) => !value)} className="flex items-center gap-1.5 text-xs text-zinc-500 transition hover:text-white">{showAllSongs ? 'Show less' : 'Explore all'} <ArrowRight className="size-3.5" /></button> : undefined} />
+        {discoverySongs.length ? <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">{discoverySongs.slice(0, showAllSongs || query ? discoverySongs.length : 6).map(songCard)}</div> : <EmptyState icon={Search} title="No signal found" copy="Try KR$NA, Raftaar, Ikka or Honey Singh." action={() => setQuery('')} />}
       </section>
+
+      {trendingSongs.length > 0 && !query && <section className="mt-20">
+        <SectionTitle eyebrow="Trending now" title="Moving through the city" />
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">{trendingSongs.map((song, index) => <button key={song._id} onClick={() => playSong(song)} className="group flex min-w-0 items-center gap-3 rounded-2xl border border-white/[.07] bg-white/[.025] p-3 text-left transition hover:-translate-y-0.5 hover:bg-white/[.05]"><Cover song={song} index={index + 3} className="size-14 rounded-xl" /><span className="min-w-0 flex-1"><strong className="block truncate text-xs group-hover:text-lime-300">{song.title}</strong><small className="mt-1 block truncate text-[9px] text-zinc-600">{song.artist}</small></span><span className="grid size-8 place-items-center rounded-full bg-white/[.06] text-zinc-500 group-hover:bg-lime-300 group-hover:text-black"><Play className="size-3" fill="currentColor" /></span></button>)}</div>
+      </section>}
+
+      {albums.length > 0 && <section className="mt-20">
+        <SectionTitle eyebrow="Releases" title="Album shelf" />
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">{albums.map((album) => <Link key={album._id} to={`/albums/${album._id}`} className="group"><div className="relative mb-3 aspect-square overflow-hidden rounded-[22px] border border-white/10 bg-white/[.03] shadow-xl transition duration-300 group-hover:-translate-y-1 group-hover:shadow-violet-950/50"><img className="h-full w-full object-cover transition duration-700 group-hover:scale-105" src={album.imageUrl} alt="" /><div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" /><span className="absolute bottom-3 right-3 grid size-10 place-items-center rounded-full bg-lime-300 text-black opacity-0 transition group-hover:opacity-100"><ArrowRight className="size-4" /></span></div><strong className="block truncate text-sm">{album.title}</strong><span className="mt-1 block truncate text-[10px] text-zinc-600">{album.artist} · {album.releaseYear}</span></Link>)}</div>
+      </section>}
 
       {rapSongs.length > 0 && <section className="relative mt-20 overflow-hidden rounded-[30px] border border-white/[.07] bg-gradient-to-br from-violet-950/40 via-[#111014] to-[#111014] p-6 sm:p-8">
         <div className="pointer-events-none absolute right-0 top-0 size-72 rounded-full bg-violet-600/10 blur-3xl" />
