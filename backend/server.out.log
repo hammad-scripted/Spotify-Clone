@@ -1,0 +1,21 @@
+
+> backend@1.0.0 start
+> node src/index.js
+
+◇ injected env (9) from .env // tip: ⌘ override existing { override: true }
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+MongoDB connected successfully : ac-gvp5eji-shard-00-01.0wo92qs.mongodb.net
+Server is listening on port 5000
+Attention: Clerk collects telemetry data from its SDKs when connected to development instances.
+The data collected is used to inform Clerk's product roadmap.
+To learn more, including how to opt-out from the telemetry program, visit: https://clerk.com/docs/telemetry.
+
+GET /api/v1/songs 200 7087 - 60.726 ms
+OPTIONS /api/v1/songs 204 0 - 0.438 ms
+OPTIONS /api/v1/auth/callback 204 0 - 0.191 ms
+GET /api/v1/songs 200 7087 - 160.806 ms
+POST /api/v1/auth/callback 200 454 - 162.228 ms
+GET /api/v1/songs 200 7087 - 58.899 ms
+OPTIONS /api/v1/users 204 0 - 0.175 ms
+GET /api/v1/users 401 1208 - 4.327 ms
+GET /api/v1/songs 200 7087 - 36.443 ms

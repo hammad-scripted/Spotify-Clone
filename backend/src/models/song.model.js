@@ -20,6 +20,13 @@ const songSchema = new Schema({
   duration: {
     type: Number,
   },
+  sourceUrl: {
+    type: String,
+  },
+  isPreview: {
+    type: Boolean,
+    default: false,
+  },
   albumId:{
     type:Schema.Types.ObjectId,
     ref:'Album',

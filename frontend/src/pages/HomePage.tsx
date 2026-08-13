@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { axiosInstance } from '../lib/axios';
 
-type Song = { _id: string; title: string; artist: string; imageUrl?: string; audioUrl?: string; duration?: number };
+type Song = { _id: string; title: string; artist: string; imageUrl?: string; audioUrl?: string; duration?: number; isPreview?: boolean; sourceUrl?: string };
 type ChatUser = { _id: string; clerkId: string; fullName: string; imageUrl: string };
 type Message = { _id: string; senderId: string; receiverId: string; content: string; createdAt: string };
 
@@ -113,6 +113,8 @@ export const HomePage = () => {
 
   const filteredSongs = useMemo(() => songs.filter((song) =>
     `${song.title} ${song.artist}`.toLowerCase().includes(query.toLowerCase())), [songs, query]);
+  const rapSongs = useMemo(() => songs.filter((song) =>
+    /kr\$na|raftaar/i.test(song.artist)), [songs]);
 
   const playSong = (song: Song) => {
     if (current._id === song._id) setIsPlaying((playing) => !playing);
@@ -189,10 +191,20 @@ export const HomePage = () => {
           <div className="album-grid">
             {filteredSongs.slice(0, 6).map((song, index) => <button className="album-card" key={song._id} onClick={() => playSong(song)}>
               <div className="cover-wrap"><Cover song={song} index={index} large /><span className="card-play">{current._id === song._id && isPlaying ? <Pause fill="currentColor" /> : <Play fill="currentColor" />}</span></div>
-              <strong>{song.title}</strong><span>{song.artist}</span>
+              <strong>{song.title}</strong><span>{song.isPreview ? `Official preview · ${song.artist}` : song.artist}</span>
             </button>)}
           </div>
         </section>
+
+        {rapSongs.length > 0 && <section className="section rap-section">
+          <div className="section-heading"><div><span className="eyebrow">Desi hip-hop</span><h2>Bars on repeat</h2></div><span className="preview-note">Official 30-second previews</span></div>
+          <div className="album-grid">
+            {rapSongs.map((song, index) => <button className="album-card" key={song._id} onClick={() => playSong(song)}>
+              <div className="cover-wrap"><Cover song={song} index={index + 2} large /><span className="card-play">{current._id === song._id && isPlaying ? <Pause fill="currentColor" /> : <Play fill="currentColor" />}</span></div>
+              <strong>{song.title}</strong><span>Preview · {song.artist}</span>
+            </button>)}
+          </div>
+        </section>}
 
         <section className="section chart-section" id="library">
           <div className="section-heading"><div><span className="eyebrow">Right now</span><h2>Your rotation</h2></div><button>View queue <ListMusic /></button></div>
@@ -201,7 +213,7 @@ export const HomePage = () => {
             {filteredSongs.slice(0, 5).map((song, index) => <button className={`track-row ${current._id === song._id ? 'current' : ''}`} key={song._id} onClick={() => playSong(song)}>
               <span className="track-number">{current._id === song._id && isPlaying ? <span className="equalizer"><i /><i /><i /></span> : index + 1}</span>
               <span className="track-title"><Cover song={song} index={index} /><span><strong>{song.title}</strong><small>{song.artist}</small></span></span>
-              <span className="track-album">Daily Mix {index + 1}</span><span>{formatTime(song.duration)}</span>
+              <span className="track-album">{song.isPreview ? 'Official preview' : `Daily Mix ${index + 1}`}</span><span>{formatTime(song.duration)}</span>
             </button>)}
           </div>
         </section>

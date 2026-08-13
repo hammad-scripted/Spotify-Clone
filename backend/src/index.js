@@ -1,6 +1,5 @@
 import express from 'express';
 import http from 'node:http';
-import dns from 'node:dns/promises';
 import chalk from 'chalk';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
@@ -23,10 +22,6 @@ import errorHandler from './errors/errorHandler.js';
 import { notFound } from './errors/notFound.js';
 
 dotenv.config();
-
-if (process.env.MONGO_URI?.startsWith('mongodb+srv://')) {
-  dns.setServers(['8.8.8.8', '1.1.1.1']);
-}
 
 const PORT = process.env.PORT || 5000;
 const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:3000')
