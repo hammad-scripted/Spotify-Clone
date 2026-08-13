@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { connectDB } from '../db/connect.js';
+import { Album } from '../models/album.model.js';
 import { Song } from '../models/song.model.js';
 
 dotenv.config();
@@ -157,7 +158,41 @@ const seedSongs = async () => {
       },
     }));
     const result = await Song.bulkWrite(operations);
+    const ikkaSongs = await Song.find({ artist: /ikka/i }).sort({ createdAt: 1 });
+    const ikkaAlbum = await Album.findOneAndUpdate(
+      { title: 'IKKA: Soundwave Selects', artist: 'Ikka' },
+      {
+        $set: {
+          imageUrl: ikkaSongs[0]?.imageUrl,
+          releaseYear: 2026,
+          songs: ikkaSongs.map((song) => song._id),
+        },
+      },
+      { returnDocument: 'after', upsert: true, runValidators: true, setDefaultsOnInsert: true },
+    );
+    await Song.updateMany(
+      { _id: { $in: ikkaSongs.map((song) => song._id) } },
+      { $set: { albumId: ikkaAlbum._id } },
+    );
+    const raftaarSongs = await Song.find({ artist: /raftaar/i }).sort({ createdAt: 1 });
+    const raftaarAlbum = await Album.findOneAndUpdate(
+      { title: 'RAFTAAR: Soundwave Selects', artist: 'Raftaar' },
+      {
+        $set: {
+          imageUrl: raftaarSongs[0]?.imageUrl,
+          releaseYear: 2026,
+          songs: raftaarSongs.map((song) => song._id),
+        },
+      },
+      { returnDocument: 'after', upsert: true, runValidators: true, setDefaultsOnInsert: true },
+    );
+    await Song.updateMany(
+      { _id: { $in: raftaarSongs.map((song) => song._id) } },
+      { $set: { albumId: raftaarAlbum._id } },
+    );
     console.log(`Song catalog ready: ${result.upsertedCount} added, ${result.modifiedCount} updated.`);
+    console.log(`Ikka album ready with ${ikkaSongs.length} tracks.`);
+    console.log(`Raftaar album ready with ${raftaarSongs.length} tracks.`);
   } catch (error) {
     console.error('Unable to seed songs:', error);
     process.exitCode = 1;
