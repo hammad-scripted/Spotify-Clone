@@ -1,4 +1,3 @@
-import './App.css';
 import { Route } from 'react-router-dom';
 import { Routes } from 'react-router-dom';
 import { AuthCallBackPage } from './pages/AuthCallBackPage';
