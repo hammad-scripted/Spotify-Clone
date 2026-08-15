@@ -14,8 +14,8 @@ export function ThemeToggle({ className }: { className?: string }) {
     title={`Switch to ${isLight ? 'dark' : 'light'} mode`}
     aria-pressed={isLight}
   >
-    <Sun className="absolute left-2 size-3.5 text-amber-300 transition" />
-    <Moon className="absolute right-2 size-3.5 text-violet-300 transition" />
+    <Moon className={cn('absolute left-2 size-3.5 text-violet-400 transition-opacity duration-300', isLight ? 'opacity-100' : 'opacity-0')} />
+    <Sun className={cn('absolute right-2 size-3.5 text-amber-400 transition-opacity duration-300', isLight ? 'opacity-0' : 'opacity-100')} />
     <span className={cn('relative z-10 grid size-7 place-items-center rounded-full bg-white text-black shadow-md transition-transform duration-300', isLight ? 'translate-x-[26px]' : 'translate-x-0')}>
       {isLight ? <Sun className="size-3.5 text-amber-600" /> : <Moon className="size-3.5 text-violet-700" />}
     </span>
