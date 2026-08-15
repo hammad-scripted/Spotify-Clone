@@ -9,6 +9,7 @@ import { type FormEvent, useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { axiosInstance } from '../lib/axios';
 import { cn } from '../lib/utils';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 type Song = { _id: string; title: string; artist: string; imageUrl?: string; duration?: number; isPreview?: boolean };
 type Album = { _id: string; title: string; artist: string; imageUrl: string; releaseYear: number; songs?: string[] };
@@ -83,7 +84,7 @@ export const AdminPage = () => {
   if (!isSignedIn || access === 'denied') return <div className="min-h-screen bg-[#07070a] text-white"><AdminState icon={ShieldCheck} title={isSignedIn ? 'Studio access required' : 'Sign in to continue'} copy={isSignedIn ? 'This account is not listed as a Soundwave administrator.' : 'Use the administrator account configured for this project.'} action={!isSignedIn ? <SignInButton mode="modal"><button className="rounded-full bg-lime-300 px-5 py-2.5 text-xs font-bold text-black">Sign in</button></SignInButton> : undefined} /></div>;
   if (access === 'error') return <AdminState icon={AlertTriangle} title="Studio is unavailable" copy="The permission check could not be completed. Make sure the backend is running." />;
 
-  return <div className="min-h-screen bg-[#07070a] text-white selection:bg-lime-300 selection:text-black">
+  return <div className="app-shell motion-page min-h-screen bg-[#07070a] text-white selection:bg-lime-300 selection:text-black">
     <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(124,58,237,.15),transparent_28%),radial-gradient(circle_at_90%_80%,rgba(190,242,100,.06),transparent_24%)]" />
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[250px] flex-col border-r border-white/[.07] bg-[#0a090d]/95 p-5 backdrop-blur-2xl lg:flex">
       <Link to="/" className="mb-9 flex items-center gap-3 px-2 text-[17px] font-bold tracking-[-.04em]"><span className="grid size-9 place-items-center rounded-xl bg-lime-300 text-black"><Disc3 className="size-4" /></span>soundwave<span className="text-lime-300">°</span></Link>
@@ -93,7 +94,7 @@ export const AdminPage = () => {
     </aside>
 
     <main className="relative z-10 mx-auto max-w-[1500px] px-4 pb-16 lg:ml-[250px] lg:px-10">
-      <header className="sticky top-0 z-20 flex h-[76px] items-center justify-between border-b border-white/[.07] bg-[#07070a]/80 backdrop-blur-2xl"><div className="flex items-center gap-3"><Link to="/" className="grid size-9 place-items-center rounded-full border border-white/10 text-zinc-500 hover:text-white"><ArrowLeft className="size-4" /></Link><div><span className="text-[9px] font-bold uppercase tracking-[.2em] text-violet-400">Soundwave</span><h1 className="text-sm font-semibold">Admin studio</h1></div></div><UserButton /></header>
+      <header className="sticky top-0 z-20 flex h-[76px] items-center justify-between border-b border-white/[.07] bg-[#07070a]/80 backdrop-blur-2xl"><div className="flex items-center gap-3"><Link to="/" className="grid size-9 place-items-center rounded-full border border-white/10 text-zinc-500 hover:text-white"><ArrowLeft className="size-4" /></Link><div><span className="text-[9px] font-bold uppercase tracking-[.2em] text-violet-400">Soundwave</span><h1 className="text-sm font-semibold">Admin studio</h1></div></div><div className="flex items-center gap-3"><ThemeToggle /><UserButton /></div></header>
 
       <div className="py-10"><div className="mb-10 flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><div className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.2em] text-lime-300"><span className="size-1.5 rounded-full bg-lime-300" />System online</div><h2 className="text-4xl font-semibold tracking-[-.055em] sm:text-5xl">Control the<br /><span className="font-serif font-normal italic text-violet-300">frequency.</span></h2></div><button onClick={() => setView('upload')} className="flex h-11 items-center justify-center gap-2 rounded-full bg-lime-300 px-5 text-xs font-bold text-black shadow-[0_12px_35px_-14px_rgba(190,242,100,.8)]"><Plus className="size-4" />Add new music</button></div>
 
