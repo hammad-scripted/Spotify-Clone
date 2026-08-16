@@ -16,6 +16,8 @@ services:
         value: https://spotify-clone-web-hammad.onrender.com
       - key: MONGO_URI
         sync: false
+      - key: CLERK_PUBLISHABLE_KEY
+        sync: false
       - key: CLERK_SECRET_KEY
         sync: false
       - key: ADMIN_EMAIL

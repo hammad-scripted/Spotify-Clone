@@ -23,6 +23,7 @@ Copy the Atlas connection string for `MONGO_URI`.
 Backend values:
 
 - `MONGO_URI`: MongoDB Atlas connection string
+- `CLERK_PUBLISHABLE_KEY`: Clerk publishable key (`pk_...`)
 - `CLERK_SECRET_KEY`: Clerk secret key (`sk_...`)
 - `ADMIN_EMAIL`: the Clerk account email that should access `/admin`
 - `CLOUDINARY_NAME`: Cloudinary cloud name
