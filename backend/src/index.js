@@ -34,6 +34,12 @@ const io = new Server(server, { cors: { origin: allowedOrigins, credentials: tru
 app.set('io', io);
 app.disable('x-powered-by');
 app.use(morgan('tiny'));
+
+// Keep Render's readiness probe independent from external services and auth.
+app.get('/api/v1/health', (_req, res) => {
+  res.status(200).json({ status: 'ok', uptime: process.uptime() });
+});
+
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -44,10 +50,6 @@ app.use(fileupload({
   limits: { fileSize: 10 * 1024 * 1024 },
   abortOnLimit: true,
 }));
-
-app.get('/api/v1/health', (_req, res) => {
-  res.status(200).json({ status: 'ok', uptime: process.uptime() });
-});
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/auth', authRouter);

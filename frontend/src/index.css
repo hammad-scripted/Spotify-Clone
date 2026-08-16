@@ -8,8 +8,8 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; background: #07070a; }
-body { margin: 0; min-width: 320px; min-height: 100vh; background: #07070a; font-family: "Geist Variable", sans-serif; }
+html { scroll-behavior: smooth; background: #07070a; transition: background-color .35s ease; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: #07070a; font-family: "Geist Variable", sans-serif; transition: background-color .35s ease, color .35s ease; }
 h1, h2, h3 { font-family: "Space Grotesk Variable", "Geist Variable", sans-serif; font-optical-sizing: auto; }
 button, a, input { -webkit-tap-highlight-color: transparent; }
 button { cursor: pointer; }
@@ -19,3 +19,88 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 ::-webkit-scrollbar-thumb { border-radius: 999px; background: #302d36; }
 .sound-range { width: 100%; height: 3px; accent-color: #bef264; cursor: pointer; }
 @keyframes slide-in { from { transform: translateX(100%); } }
+
+/* Motion system */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes float-card {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -9px; }
+}
+@keyframes float-card-slow {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 7px; }
+}
+@keyframes soft-glow {
+  0%, 100% { opacity: .55; transform: scale(.96); }
+  50% { opacity: .9; transform: scale(1.04); }
+}
+
+.motion-page { animation: page-enter .5s cubic-bezier(.22, 1, .36, 1) both; }
+.motion-page main > section,
+.motion-page main > div:not(:first-child) { animation: reveal-up .7s cubic-bezier(.22, 1, .36, 1) both; }
+.motion-page main > :nth-child(3) { animation-delay: 80ms; }
+.motion-page main > :nth-child(4) { animation-delay: 140ms; }
+.motion-page main > :nth-child(5) { animation-delay: 200ms; }
+.motion-float { animation: float-card 5s ease-in-out infinite; }
+.motion-float-slow { animation: float-card-slow 6.5s ease-in-out infinite; }
+.motion-page [class*="blur-["] { animation: soft-glow 7s ease-in-out infinite; }
+.motion-page article,
+.motion-page main button,
+.motion-page main a { will-change: transform; }
+
+@supports (animation-timeline: view()) {
+  .motion-page main > section:not(:first-of-type) {
+    animation: reveal-up linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 22%;
+  }
+}
+
+/* Light mode keeps the neon accents but shifts the listening surface to paper. */
+html[data-theme="light"],
+html[data-theme="light"] body { background: #f4f1f7; }
+html[data-theme="light"] .app-shell { background: #f4f1f7 !important; color: #1d1823 !important; }
+html[data-theme="light"] .app-shell [class*="bg-[#07070a]"],
+html[data-theme="light"] .app-shell [class*="bg-[#09090c]"],
+html[data-theme="light"] .app-shell [class*="bg-[#0a090d]"],
+html[data-theme="light"] .app-shell [class*="bg-[#0c0b0f]"],
+html[data-theme="light"] .app-shell [class*="bg-[#0b0a0d]"],
+html[data-theme="light"] .app-shell [class*="bg-[#100f13]"],
+html[data-theme="light"] .app-shell [class*="bg-[#151419]"] {
+  background-color: rgb(249 247 251 / .94) !important;
+}
+html[data-theme="light"] .app-shell [class*="bg-[#111014]"] {
+  background-color: #ebe5f0 !important;
+}
+html[data-theme="light"] .app-shell [class*="bg-white/["] { background-color: rgb(29 24 35 / .045) !important; }
+html[data-theme="light"] .app-shell [class*="border-white/"] { border-color: rgb(29 24 35 / .12) !important; }
+html[data-theme="light"] .app-shell [class*="ring-white/"] { --tw-ring-color: rgb(29 24 35 / .14) !important; }
+html[data-theme="light"] .app-shell .text-white,
+html[data-theme="light"] .app-shell .text-zinc-200,
+html[data-theme="light"] .app-shell .text-zinc-300 { color: #211a28 !important; }
+html[data-theme="light"] .app-shell .text-zinc-400 { color: #5f5667 !important; }
+html[data-theme="light"] .app-shell .text-zinc-500 { color: #716878 !important; }
+html[data-theme="light"] .app-shell .text-zinc-600,
+html[data-theme="light"] .app-shell .text-zinc-700 { color: #887e90 !important; }
+html[data-theme="light"] .app-shell .theme-toggle { background: rgb(255 255 255 / .75) !important; border-color: rgb(29 24 35 / .14) !important; }
+html[data-theme="light"] .app-shell .bg-white { background-color: #fff !important; }
+html[data-theme="light"] .app-shell .bg-black\/20,
+html[data-theme="light"] .app-shell .bg-black\/35,
+html[data-theme="light"] .app-shell .bg-black\/50 { background-color: rgb(255 255 255 / .55) !important; }
+html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #b8afc0; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

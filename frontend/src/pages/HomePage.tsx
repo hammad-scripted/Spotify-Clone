@@ -11,6 +11,7 @@ import { io, type Socket } from 'socket.io-client';
 import axios from 'axios';
 import { axiosInstance } from '../lib/axios';
 import { cn } from '../lib/utils';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 type Song = { _id: string; title: string; artist: string; imageUrl?: string; audioUrl?: string; duration?: number; isPreview?: boolean; sourceUrl?: string };
 type ChatUser = { _id: string; clerkId: string; fullName: string; imageUrl: string };
@@ -199,7 +200,7 @@ export const HomePage = () => {
   };
   const songCard = (song: Song, index: number) => <SongCard key={song._id} song={song} index={index} active={current._id === song._id} playing={isPlaying} liked={likedIds.has(song._id)} onPlay={() => playSong(song)} onLike={() => toggleLike(song._id)} />;
 
-  return <div className="min-h-screen overflow-x-hidden bg-[#07070a] pb-36 text-white selection:bg-lime-300 selection:text-black md:pl-[244px] md:pb-28">
+  return <div className="app-shell motion-page min-h-screen overflow-x-hidden bg-[#07070a] pb-36 text-white selection:bg-lime-300 selection:text-black md:pl-[244px] md:pb-28">
     <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_75%_0%,rgba(124,58,237,.14),transparent_32%),radial-gradient(circle_at_20%_80%,rgba(190,242,100,.06),transparent_28%)]" />
 
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-[244px] flex-col border-r border-white/[.07] bg-[#09090c]/95 px-5 py-7 backdrop-blur-2xl md:flex">
@@ -227,7 +228,7 @@ export const HomePage = () => {
             {filteredSongs.length ? filteredSongs.slice(0, 8).map((song, index) => <button key={song._id} onClick={() => { playSong(song); setSearchOpen(false); }} className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-white/[.06]"><Cover song={song} index={index} className="size-11 rounded-lg" /><span className="min-w-0 flex-1"><strong className="block truncate text-xs">{song.title}</strong><small className="mt-1 block truncate text-[10px] text-zinc-500">{song.artist}</small></span><Play className="size-3.5 text-lime-300" fill="currentColor" /></button>) : <div className="grid place-items-center gap-2 px-5 py-10 text-center text-xs text-zinc-500"><Search className="size-5" />No signal found for “{query}”</div>}
           </div>}
         </div>
-        <div className="flex items-center justify-end gap-2"><button onClick={() => setChatOpen(true)} className="hidden h-9 items-center gap-2 rounded-full border border-white/10 px-4 text-xs font-semibold text-zinc-300 transition hover:bg-white/[.06] sm:flex"><Users className="size-3.5" />Listening room</button><Show when="signed-out"><SignInButton mode="modal"><button className="h-9 rounded-full bg-white px-5 text-xs font-bold text-black transition hover:bg-lime-300">Log in</button></SignInButton></Show><Show when="signed-in"><UserButton /></Show></div>
+        <div className="flex items-center justify-end gap-2"><ThemeToggle /><button onClick={() => setChatOpen(true)} className="hidden h-9 items-center gap-2 rounded-full border border-white/10 px-4 text-xs font-semibold text-zinc-300 transition hover:bg-white/[.06] sm:flex"><Users className="size-3.5" />Listening room</button><Show when="signed-out"><SignInButton mode="modal"><button className="h-9 rounded-full bg-white px-5 text-xs font-bold text-black transition hover:bg-lime-300">Log in</button></SignInButton></Show><Show when="signed-in"><UserButton /></Show></div>
       </header>
 
       <section className="relative mt-5 min-h-[470px] overflow-hidden rounded-[32px] border border-white/[.08] bg-[#111014] p-7 shadow-[0_40px_100px_-50px_rgba(124,58,237,.6)] sm:p-10 lg:grid lg:grid-cols-[1.1fr_.9fr] lg:items-center lg:p-14">
@@ -240,8 +241,8 @@ export const HomePage = () => {
         </div>
         <div className="relative mt-12 h-[290px] lg:mt-0 lg:h-[360px]">
           <div className="absolute left-1/2 top-1/2 h-48 w-48 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-600/50 blur-[80px]" />
-          <div className="absolute left-[10%] top-[8%] hidden w-[42%] -rotate-12 rounded-[28px] border border-white/10 bg-white/[.04] p-3 opacity-45 shadow-2xl backdrop-blur md:block"><Cover song={songs[1] || current} index={1} className="aspect-square rounded-[20px]" /></div>
-          <div className="group absolute left-1/2 top-1/2 w-[min(250px,70%)] -translate-x-1/2 -translate-y-1/2 rotate-3 rounded-[30px] border border-white/15 bg-white/[.08] p-3 shadow-[0_40px_80px_-20px_rgba(0,0,0,.9)] backdrop-blur-xl transition duration-500 hover:rotate-0 hover:scale-105"><Cover song={current} index={songs.findIndex((song) => song._id === current._id)} className="aspect-square rounded-[22px]" /><div className="flex items-center gap-3 px-2 pb-1 pt-3"><span className="grid size-8 place-items-center rounded-full bg-lime-300 text-black"><Disc3 className={cn('size-4', isPlaying && 'animate-spin [animation-duration:3s]')} /></span><span className="min-w-0"><strong className="block truncate text-xs">{current.title}</strong><small className="mt-0.5 block truncate text-[9px] text-zinc-500">{current.artist}</small></span></div></div>
+          <div className="motion-float-slow absolute left-[10%] top-[8%] hidden w-[42%] -rotate-12 rounded-[28px] border border-white/10 bg-white/[.04] p-3 opacity-45 shadow-2xl backdrop-blur md:block"><Cover song={songs[1] || current} index={1} className="aspect-square rounded-[20px]" /></div>
+          <div className="motion-float group absolute left-1/2 top-1/2 w-[min(250px,70%)] -translate-x-1/2 -translate-y-1/2 rotate-3 rounded-[30px] border border-white/15 bg-white/[.08] p-3 shadow-[0_40px_80px_-20px_rgba(0,0,0,.9)] backdrop-blur-xl transition duration-500 hover:rotate-0 hover:scale-105"><Cover song={current} index={songs.findIndex((song) => song._id === current._id)} className="aspect-square rounded-[22px]" /><div className="flex items-center gap-3 px-2 pb-1 pt-3"><span className="grid size-8 place-items-center rounded-full bg-lime-300 text-black"><Disc3 className={cn('size-4', isPlaying && 'animate-spin [animation-duration:3s]')} /></span><span className="min-w-0"><strong className="block truncate text-xs">{current.title}</strong><small className="mt-0.5 block truncate text-[9px] text-zinc-500">{current.artist}</small></span></div></div>
           <div className="absolute bottom-[8%] right-[3%] rounded-2xl border border-white/10 bg-black/35 px-4 py-3 backdrop-blur-xl"><span className="block text-[9px] uppercase tracking-[.18em] text-zinc-500">On air</span><strong className="mt-1 block text-sm text-lime-300">{isPlaying ? 'Live now' : 'Ready'}</strong></div>
         </div>
       </section>
